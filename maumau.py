@@ -39,37 +39,47 @@ class Player(object):
         for i in range(6):
             self.cards.append(deck.pop())
     
-    def play(self, pile, deck):
+    def play(self, pile, deck, game):
         pass
     
-    def draw(self, deck):
+    def draw(self, pile, deck):
+        #If the deck is empty, rebuild the deck
+        if len(deck) == 0:
+            while (len(pile) > 1):
+                deck.append(pile.pop())
+            random.shuffle(deck)
+            print("New deck.")
         self.cards.append(deck.pop())
-
+        
+    def playCard(self, card, pile):
+        pile.append(card)
+        self.cards.remove(card)
+        
 
 class ComputerPlayer(Player):
 
-    def play(self, pile, deck):
+    def play(self, pile, deck, game):
         nbrCards = len(self.cards)
         for c in self.cards:
             if c.isPlayable(pile[len(pile)-1]):
-                pile.append(c)
-                self.cards.remove(c)
+                self.playCard(c, pile)
+                game.effectActive = (c.value == "8")
                 #print(c, "is played by ", player.name)
                 break
         if nbrCards == len(self.cards): #no card was played
-            self.draw(deck)
+            self.draw(pile, deck)
             print("Need to draw.")
 
 class HumanPlayer(Player):
     
-    def play(self, pile, deck):
+    def play(self, pile, deck, game):
         playableCards = []
         for c in self.cards:
             if c.isPlayable(pile[len(pile)-1]):
                 playableCards.append(c)
                 
         if (len(playableCards) == 0):
-            self.draw(deck)
+            self.draw(pile, deck)
             print("No card can be played.")
             #print(self.cards[len(self.cards)-1], " is drawn.")
             print("{} is drawn.".format(self.cards[len(self.cards)-1] ))
@@ -86,10 +96,15 @@ class HumanPlayer(Player):
             print(playableCards)
             cardNumber = input("Select a card by typing its number. ")
             c = playableCards[cardNumber]
-            pile.append(c)
-            self.cards.remove(c)
+            game.effectActive = (c.value == "8")
+            self.playCard(c, pile)
 
-
+class Game:
+    effectActive = False
+    endOfGame = False
+    def __init__(self):
+        effectActive = False
+        endOfGame = False
 
 
 """
@@ -108,19 +123,18 @@ players = [ComputerPlayer("Computer1", deck),
 ]
 random.shuffle(players)
 
-endOfGame = False
-while not endOfGame:
+game = Game()
+while not game.endOfGame:
     for p in players:
+        #Must the player pause due to an 8?
         print("{}'s turn.".format(p.name))
-        #If the deck is empty, rebuild the deck
-        if len(deck) == 0:
-            while (len(pile) > 1):
-                deck.append(pile.pop())
-            random.shuffle(deck)
-            print("New deck.")
-        p.play(pile, deck)
+        if game.effectActive and pile[len(pile)-1].value == "8":
+            game.effectActive = False
+            print('{} must pause.'.format(p.name)) 
+            continue
+        p.play(pile, deck, game)
         if len(p.cards) == 0:
-            endOfGame = True
+            game.endOfGame = True
             print("{} won the game.".format(p.name))
             #print(pile[0])
             break

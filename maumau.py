@@ -13,7 +13,7 @@ class Card(object):
 
     #To be printable in print(card)
     def __str__(self): 
-        return '{} of {}'.format(self.color, self.value)
+        return '{} of {}'.format(self.value, self.color)
     #To be printable in print(listOfCards)
     def __repr__(self):
         return str(self)
@@ -74,7 +74,7 @@ class HumanPlayer(Player):
             #print(self.cards[len(self.cards)-1], " is drawn.")
             print("{} is drawn.".format(self.cards[len(self.cards)-1] ))
             try:
-                msg = input("Press Enter to continue. ")
+                input("Press Enter to continue. ")
             except SyntaxError:
                 pass
         else:
@@ -95,6 +95,10 @@ class HumanPlayer(Player):
 """
 let the 'Mau Mau Game' begin
 """
+#nbrPlayers = input("Enter the number of players. ")
+#check: is nbrPlayers a number in the right range?
+#nbrHumans = input("How many humans are playing? ")
+#TODO: increase the deck size according to player numbers
 
 deck = Deck32()
 pile = [deck.pop()]
@@ -102,6 +106,7 @@ players = [ComputerPlayer("Computer1", deck),
               ComputerPlayer("Computer2", deck),
               HumanPlayer("Jo", deck)
 ]
+random.shuffle(players)
 
 endOfGame = False
 while not endOfGame:
